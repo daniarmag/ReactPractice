@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <style>
+        body 
+        {
+            background-color: #303030;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .small-image 
+        {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .small-image-container 
+        {
+            position: relative;
+            justify-content: center;
+            padding: 8px;
+            background-color: #284C79;
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .selected-image-container 
+        {
+            margin-top: 20px;
+            text-align: center;
+            background-color: #faf9f9cd;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .selected-image-container img 
+        {
+            margin-top: 20px;
+            max-width: 400px;
+            max-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="text/babel">
+    class ImageViewerApp extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                images: [],
+                selectedImage: null
+            };
+        }
+
+        componentDidMount() {
+            /* Max images that can be loaded */
+            const limit = 15; 
+            fetch('https://picsum.photos/v2/list?limit=' + limit)
+                .then(response => response.json())
+                .then(data => {
+                    const images = data.map(item => ({
+                        thumbnail: `https://picsum.photos/100/100?image=${item.id}`,
+                        full: `https://picsum.photos/${item.width}/${item.height}?image=${item.id}`
+                    }));
+                    this.setState({ images });
+                    if (images.length > 0) {
+                        this.setState({ selectedImage: images[0].full });
+                    }
+                })
+                .catch(error => console.error('Error fetching images:', error));
+        }
+
+        select_image = (image_url) => {
+            this.setState({ selectedImage: image_url });
+        }
+
+        render() {
+            return (
+                <div>
+                    <div className="small-image-container">
+                        {/* Small images */}
+                        {this.state.images.map(image => (
+                            <img key={image.thumbnail} src={image.thumbnail} className="small-image" onClick={() => this.select_image(image.full)} />
+                        ))}
+                    </div>
+                    {this.state.selectedImage && (
+                        <div className="selected-image-container">
+                            {/* Selected image */}
+                            <img src={this.state.selectedImage}/>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+    }
+    ReactDOM.render(<ImageViewerApp />, document.getElementById('app'));
+</script>
+<script src="
